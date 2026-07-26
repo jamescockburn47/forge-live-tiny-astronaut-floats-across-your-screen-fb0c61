@@ -1,6 +1,7 @@
 (function () {
   'use strict';
 
+  const MAX_FLYERS = 6;
   const starsContainer = document.getElementById('stars');
 
   // ---------- Stars ----------
@@ -93,6 +94,14 @@
   // ---------- Astronaut spawn ----------
   function rand(min, max) { return Math.random() * (max - min) + min; }
 
+  function getFlyerCount() {
+    return document.querySelectorAll('.astronaut-flyer').length;
+  }
+
+  function canSpawn() {
+    return getFlyerCount() < MAX_FLYERS;
+  }
+
   function createAstronaut(opts) {
     const flyer = document.createElement('div');
     flyer.className = 'astronaut-flyer';
@@ -135,14 +144,15 @@
     // Then keep a gentle trickle
     setInterval(() => {
       // Cap concurrent flyers to avoid clutter
-      const live = document.querySelectorAll('.astronaut-flyer').length;
-      if (live < 6) spawnRandom();
+      if (canSpawn()) spawnRandom();
     }, 3200);
   }
 
   // ---------- Click to spawn ----------
   function handleClick(e) {
     // Ignore clicks on the hint (it has pointer-events:none anyway, but safe)
+    // Cap concurrent flyers to avoid unbounded DOM growth from rapid clicks
+    if (!canSpawn()) return;
     const size = rand(55, 110);
     // Roughly center the astronaut on the click Y (account for flyer height)
     const y = e.clientY - size * 0.6;
